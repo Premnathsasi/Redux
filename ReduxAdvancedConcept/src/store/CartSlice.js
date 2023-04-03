@@ -10,11 +10,12 @@ const cartSlice = createSlice({
         additems(state, action)  {
             const newItem = action.payload;
             const existingItems = state.items.find((item) => item.id === newItem.id);
-            if (existingItems) {
-                state.items.pudh({
-                    itemId: newItem.id,
+            state.totalQuantity++
+            if (!existingItems) {
+                state.items.push({
+                    id: newItem.id,
                     price: newItem.price,
-                    quantity: newItem.quantity,
+                    quantity:1,
                     totalPrice: newItem.price,
                     name: newItem.title
                 });
@@ -24,8 +25,19 @@ const cartSlice = createSlice({
             }
 
         },
-        removeItems() {
-
+        removeItems(state, action) {
+            const id = action.payload;
+            const existingItems = state.items.find((item) => item.id ===id);
+            state.totalQuantity--;
+            if (existingItems.quantity === 1) {
+                state.items  = state.items.filter((item) => item.id !== id)
+            } else {
+                existingItems.quantity--;
+                existingItems.totalPrice = existingItems.totalPrice - existingItems.price;
+            }
         }
     }
 })
+
+export const cartActions = cartSlice.actions;
+export default cartSlice;
