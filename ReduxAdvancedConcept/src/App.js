@@ -5,6 +5,7 @@ import Products from "./components/Shop/Products";
 import { useSelector, useDispatch } from "react-redux";
 import { uiActions } from "./store/UiSlice";
 import Notification from "./components/UI/Notification";
+import { cartActions } from "./store/CartSlice";
 
 let isInitial = true;
 
@@ -13,6 +14,45 @@ function App() {
   const isCartVisible = useSelector((state) => state.ui.isCartVisible);
   const cart = useSelector((state) => state.cart);
   const notification = useSelector((state) => state.ui.notification);
+
+
+  useEffect(() => {
+    const fetchCartData = async() => {
+      const fetchData = async () => {
+        const response = await fetch(
+          'https://http-request-30a26-default-rtdb.firebaseio.com/cart.json'
+        );
+  
+        if (!response.ok) {
+          throw new Error('Could not fetch cart data!');
+        }
+  
+        const data = await response.json();
+  
+        return data;
+      };
+  
+      try {
+        const cartData = await fetchData();
+        dispatch(
+          cartActions.replaceCart({
+            items: cartData.items || [],
+            totalQuantity: cartData.totalQuantity,
+          })
+        );
+      } catch (error) {
+        dispatch(
+          uiActions.showNotification({
+            status: 'error',
+            title: 'Error!',
+            message: 'Fetching cart data failed!',
+          })
+        );
+      }
+  
+    };
+    fetchCartData();
+  }, [dispatch])
 
   useEffect(() => {
     const sendCartData = async () => {
